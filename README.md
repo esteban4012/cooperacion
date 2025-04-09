@@ -13,9 +13,7 @@ vamos hacer el trabajo con kelly
 
 lo logre  
 
-<<<<<<< HEAD
 hola compañeros, hoy adelantare ttabajo
-=======
 estamos grabando un pequeño tutorial
 
 navegar a la carpeta que estamos trabajando en git con el comando cd
@@ -27,6 +25,6 @@ navegar a la carpeta que estamos trabajando en git con el comando cd
 3. hacer commit con el comando:  git commit -m "mensaje"
 
 4. git push origin master
->>>>>>> a20ca6a25bb72d4d60830c766d097bd37d0c563b
 
 
+ya cree la carpeta no se esta bien me cuenta esteban.
