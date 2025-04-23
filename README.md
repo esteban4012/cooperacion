@@ -12,8 +12,9 @@ puedo ser una estrella un cantante-manuel turizo
 vamos hacer el trabajo con kelly
 
 lo logre  
-
+ HEAD
 hola compañeros, hoy adelantare ttabajo
+
 estamos grabando un pequeño tutorial
 
 navegar a la carpeta que estamos trabajando en git con el comando cd
@@ -28,3 +29,5 @@ navegar a la carpeta que estamos trabajando en git con el comando cd
 
 
 ya cree la carpeta no se esta bien me cuenta esteban.
+
+holaaaa

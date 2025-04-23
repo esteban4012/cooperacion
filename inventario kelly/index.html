@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario</title>
+    <style>
+        /* General */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #00bcd4; /* Verde celeste */
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 3px solid #0097a7;
+        }
+
+        .container {
+            margin: 2rem auto;
+            max-width: 900px;
+            background: white;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00796b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        table th, table td {
+            border: 1px solid #e0e0e0;
+            padding: 1rem;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        table th {
+            background-color: #00bcd4;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: #00796b;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #00838f;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.6rem;
+        }
+
+        .edit-btn {
+            background-color: #4caf50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .counter {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 1rem;
+            color: #00796b;
+        }
+
+        /* Diseño de la imagen de inventario */
+        .inventory-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gestión de Inventario</h1>
+    </header>
+
+    <div class="container">
+        <!-- Imagen de Inventario -->
+        <img src="https://via.placeholder.com/800x400.png?text=Inventario+de+Muebles" alt="Inventario" class="inventory-image">
+
+        <h2>Agregar o Editar Producto</h2>
+
+        <!-- Formulario para agregar producto -->
+        <form id="inventoryForm">
+            <div class="form-group">
+                <label for="itemSelect">Seleccionar Mueble</label>
+                <select id="itemSelect" onchange="toggleCustomInput()">
+                    <option value="Sala madera rústica">Sala madera rústica</option>
+                    <option value="Cama doble">Cama doble</option>
+                    <option value="Cama sencilla">Cama sencilla</option>
+                    <option value="Mecedora en pino">Mecedora en pino</option>
+                    <option value="otro">Otro...</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="customInputGroup" style="display:none">
+                <label for="itemName">Nombre personalizado</label>
+                <input type="text" id="itemName" placeholder="Ej. Silla Gamer" />
+            </div>
+
+            <div class="form-group">
+                <label for="itemQuantity">Cantidad</label>
+                <input type="number" id="itemQuantity" placeholder="Ej. 10" min="1" />
+            </div>
+
+            <button type="button" id="addBtn" onclick="addOrUpdateItem()">Agregar</button>
+        </form>
+
+        <!-- Tabla de inventario -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+        </table>
+
+        <div class="counter" id="productCounter">Total de productos: 0</div>
+    </div>
+
+    <script>
+        let totalItems = 0;
+        let editIndex = null;
+
+        // Actualizar el contador de productos
+        function updateCounter() {
+            document.getElementById('productCounter').textContent = `Total de productos: ${totalItems}`;
+        }
+
+        // Mostrar u ocultar campo de texto para producto personalizado
+        function toggleCustomInput() {
+            const select = document.getElementById('itemSelect');
+            const customInput = document.getElementById('customInputGroup');
+            customInput.style.display = (select.value === 'otro') ? 'block' : 'none';
+        }
+
+        // Obtener el nombre del producto (si es personalizado o predefinido)
+        function getItemName() {
+            const select = document.getElementById('itemSelect');
+            const customInput = document.getElementById('itemName');
+            
+            if (select.value === 'otro') {
+                const customName = customInput.value.trim();
+                if (!customName) {
+                    alert("Por favor escribe un nombre para el mueble personalizado.");
+                    return null;
+                }
+                return customName;
+            }
+            return select.value;
+        }
+
+        // Función para agregar o actualizar el producto
+        function addOrUpdateItem() {
+            const name = getItemName();
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+            const table = document.getElementById('inventoryTable');
+
+            if (!name || isNaN(quantity) || quantity <= 0) {
+                alert('Por favor, ingresa un nombre válido y una cantidad mayor que 0.');
+                return;
+            }
+
+            if (editIndex !== null) {
+                // Actualizar producto existente
+                const row = table.rows[editIndex];
+                const oldQuantity = parseInt(row.cells[1].textContent);
+                row.cells[0].textContent = name;
+                row.cells[1].textContent = quantity;
+                totalItems += (quantity - oldQuantity);
+                editIndex = null;
+                document.getElementById('addBtn').textContent = 'Agregar';
+            } else {
+                // Agregar nuevo producto
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+
+                cell1.textContent = name;
+                cell2.textContent = quantity;
+                cell3.innerHTML = ` 
+                    <button class="edit-btn" onclick="editItem(this)">Editar</button>
+                    <button class="delete-btn" onclick="deleteItem(this, ${quantity})">Eliminar</button>
+                `;
+                totalItems += quantity;
+            }
+
+            updateCounter();
+            document.getElementById('inventoryForm').reset();
+            document.getElementById('customInputGroup').style.display = 'none';
+        }
+
+        // Eliminar un producto
+        function deleteItem(btn, quantity) {
+            const row = btn.closest('tr');
+            row.remove();
+            totalItems -= quantity;
+            updateCounter();
+        }
+
+        // Editar un producto
+        function editItem(btn) {
+            const row = btn.closest('tr');
+            const name = row.cells[0].textContent;
+            const quantity = row.cells[1].textContent;
+
+            const select = document.getElementById('itemSelect');
+            const customInput = document.getElementById('itemName');
+
+            if ([...select.options].some(opt => opt.value === name)) {
+                select.value = name;
+                toggleCustomInput();
+            } else {
+                select.value = 'otro';
+                toggleCustomInput();
+                customInput.value = name;
+            }
+
+            document.getElementById('itemQuantity').value = quantity;
+            document.getElementById('addBtn').textContent = 'Actualizar';
+            editIndex = row.rowIndex - 1;
+        }
+
+        // Cargar productos predeterminados
+        function loadDefaultItems() {
+            const defaults = [
+                { name: 'Sala madera rústica', quantity: 2 },
+                { name: 'Cama doble', quantity: 3 },
+                { name: 'Cama sencilla', quantity: 5 },
+                { name: 'Mecedora en pino', quantity: 7 }
+            ];
+
+            defaults.forEach(item => {
+                const row = document.getElementById('inventoryTable').insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+
+                cell1.textContent = item.name;
+                cell2.textContent = item.quantity;
+                cell3.innerHTML = `
+                    <button class="edit-btn" onclick="editItem(this)">Editar</button>
+                    <button class="delete-btn" onclick="deleteItem(this, ${item.quantity})">Eliminar</button>
+                `;
+                totalItems += item.quantity;
+            });
+
+            updateCounter();
+        }
+
+        // Llamar a la carga de productos predeterminados
+        loadDefaultItems();
+    </script>
+</body>
+</html>
